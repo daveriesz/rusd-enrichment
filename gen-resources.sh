@@ -1,199 +1,51 @@
 #!/bin/bash
 
-state=beginning
+filename=
 
-cat "$0" \
-| sed -e "0,/^START FROM HERE$/d" \
+inshere='                <!-- INSERT HERE -->'
+
+cat "resources.txt" \
 | while read aa ; do
   if echo "$aa" | egrep "^\* " >/dev/null ; then
-    echo "$aa"
-    filename=`echo "${aa}.html" | tr "[A-Z]" "[a-z]" | sed "s/^\* *//g" | tr " " "-"`
-    echo "  $filename"
-  fi  
+    filename=docs/`echo "${aa}.html" | tr "[A-Z]" "[a-z]" | sed "s/^\* *//g" | tr " " "-"`
+    title=`echo "$aa" | sed "s/^\* *//g"`
+    level=`echo "$title" | sed "s/ Resources$//g"`
+    echo "FILENAME: $filename"
+    cp "template-resources.html" "$filename"
+    header=""
+    subjects=( )
+    subject_items=( )
+    si=0
+  elif echo "$aa" | egrep "^\+ " >/dev/null ; then
+    hh=`echo "$aa" | sed "s/^\+ *//g"`
+    header+="$hh<br>"
+  elif echo "$aa" | egrep "^\*\* " >/dev/null ; then
+    sb=`echo "$aa" | sed "s/^\*\* *//g"`
+    subjects[$si]="$sb"
+    si=$((si + 1))
+  elif echo "$aa" | egrep "^\*\*\* " >/dev/null ; then
+    item=`echo "$aa" | sed "s/^\*\*\* *//g"`
+    sim=$((si - 1))
+    subject_items[$sim]+="<li>${item}</li>"
+  elif echo "$aa" | egrep "^ *$" >/dev/null ; then
+    if [ "$title" = "" ] ; then continue ; fi
+    header=`echo "$header" | sed "s/<br>$//g"`
+    echo "    TITLE : $title"
+    echo "    LEVEL : $level"
+    echo "    HEADER: $header"
+    for (( ii=0 ; ii<${#subjects[@]} ; ii++ ))
+    {
+      subject_items[$ii]="<ul>${subject_items[$ii]}</ul>"
+      echo "    SUBJECT: $ii ${subjects[$ii]}"
+      echo "           : ${subject_items[$ii]}"
+
+      sed -i "s,^${inshere}$,<tr><td align=\"center\" valign=\"center\">${subjects[$ii]}</td><td width=\"100%\">${subject_items[$ii]}</td></tr>\n${inshere},g" "$filename"
+    }
+
+    sed -i "s,LEVEL,${level},g" "$filename"
+    sed -i "s,\[\([^]]*\)\] *(\([^)]*\)),<a href=\"\2\">\1</a>,g" "$filename"
+
+  fi
 
 done
 
-exit 0
-
-START FROM HERE
-
-* K-5th Resources
-
-+ Redlands Unified School District
-+ Elementary School 
-+ Enrichment Resources
-
-** English
-*** [Newsela Reading Articles](https://clever.com/in/redlands)
-*** [Khan Academy ELA Practice](https://www.khanacademy.org/ela)
-*** [ELA Digital Media Resources](https://ca.pbslearningmedia.org/grades/upper-elementary/)
-*** [Reading Comprehension](https://readtheory.org/)
-*** [Reading for TK-3rd](https://www.seussville.com/)
-** Math
-*** [Khan Academy Math Practice](https://www.khanacademy.org/math)
-*** [Math Facts Practice](https://www.factmonster.com/)
-*** [BrainPop (Math)](https://jr.brainpop.com/math/)
-** Science
-*** [Switch Zoo Animal Games](https://www.switchzoo.com/)
-*** [BrainPop (Science)](https://jr.brainpop.com/science/)
-*** [National Geographic (Science)](https://kids.nationalgeographic.com/explore/science/science-lab/)
-** Social Studies
-*** [National Geographic (United States)](https://kids.nationalgeographic.com/explore/states/)
-*** [Discovery Education](https://clever.com/in/redlands)
-*** [Informative Reading](https://www.tweentribune.com/)
-*** [BrainPop (Social Studies)](https://jr.brainpop.com/socialstudies/)
-** Extra-Curricular
-*** [Highlights for Kids](https://www.highlightskids.com/)
-*** [CODE Activities](https://code.org/student/middle-high)
-*** [Typing Agent](https://clever.com/in/redlands)
-
-* 6th-8th Resources
-
-+ Redlands Unified School District
-+ Middle School
-+ Enrichment Resources
-
-** English
-*** [Newsela Reading Articles](https://clever.com/in/redlands)
-*** [ELA Digital Media Resources](https://ca.pbslearningmedia.org/grades/middle-school/?selected_facet=subject:1880)
-*** [Reading/Writing Prompts](https://www.nytimes.com/2018/04/12/learning/over-1000-writing-prompts-for-students.html)
-*** [Khan Academy English Practice](https://www.khanacademy.org/ela)
-*** [Read Comprehension](https://readtheory.org/)
-*** [Quizlet (English)](https://quizlet.com/topic/languages/english/)
-** Math
-*** [Khan Academy Math Practice](https://www.khanacademy.org/math)
-*** [Desmos Math Practice and Activities](https://teacher.desmos.com/collections/featured)
-*** [Quizlet (Math)](https://quizlet.com/topic/math/)
-** Science
-*** [NGSS hands-on activities](https://www.teachengineering.org/standards/ngss)
-*** [Science Simulations](https://phet.colorado.edu/)
-*** [Labs & Activities](https://www.labxchange.org/explore)
-*** [Quizlet (Science)](https://quizlet.com/topic/science/)
-** Social Studies
-*** [Discovery Education](https://clever.com/in/redlands)
-*** [Informative Reading](https://www.tweentribune.com/)
-*** [Quizlet (Social Science](https://quizlet.com/topic/social-science/))
-** Extra-Curricular
-*** [CODE Activities](https://code.org/student/middle-high)
-*** [Physical Education](https://www.pecentral.org/lessonideas/searchresults.asp?category=190)
-
-
-* 9th-12th Resources
-
-+ Redlands Unified School District
-+ High School
-+ Enrichment Resources
-
-** English
-*** [Newsela Reading Articles](https://clever.com/in/redlands)
-*** [ELA Digital Media Resources](https://ca.pbslearningmedia.org/grades/high-school/?selected_facet=subject:1880)
-*** [Reading/Writing Prompts](https://www.nytimes.com/2018/04/12/learning/over-1000-writing-prompts-for-students.html)
-** Math
-*** [Khan Academy Math Practice](https://www.khanacademy.org/math)
-*** [Desmos Math Practice and Activities](https://teacher.desmos.com/collections/featured)
-*** [Online Math Practice](http://www.free-test-online.com/ccss/hs.html)
-** Science
-*** [Khan Academy Science Practice](https://www.khanacademy.org/science)
-*** [Khan Academy Comp. Science](https://www.khanacademy.org/computing)
-*** [NGSS hands-on activities](https://www.teachengineering.org/standards/ngss)
-*** [Science Simulations](https://phet.colorado.edu/)
-*** [Labs & Activities](https://www.labxchange.org/explore)
-** Social Studies
-*** [Discovery Education](https://clever.com/in/redlands)
-*** [Informative Reading](https://www.tweentribune.com/)
-*** [Khan Academy History/Arts Practice](https://www.khanacademy.org/humanities)
-** Extra-Curricular
-*** [CODE Activities](https://code.org/student/middle-high)
-*** [Physical Education](https://www.pecentral.org/lessonideas/searchresults.asp?category=190)
-*** [Dance Practice](https://www.ndeo.org/content.aspx?page_id=0&club_id=893257)
-*** [Art](https://www.nga.gov/education.html)
-
-* Advanced Placement Resources
-
-+ Redlands Unified School District
-+ Advanced Placement
-+ Enrichment Resources
-
-[College Board AP Updates](https://apcentral.collegeboard.org/about-ap/news-changes/coronavirus-update)
-
-** College Board
-*** [AP Class Daily Schedule](https://drive.google.com/file/d/1JEzvTbkx9jD1amIe_esYoM2UDPeBDrF0/view?usp=sharing)
-*** [Daily AP Lessons](https://www.youtube.com/user/advancedplacement)
-*** [AP Course Resources](https://apstudents.collegeboard.org/)
-** Khan Academy
-*** [AP Course Practice](https://www.khanacademy.org/about/blog/post/163503591115/khan-academy-is-the-official-practice-partner-for)
-** Princeton Review
-*** [AP Quizzes and Study Guides](https://www.princetonreview.com/college-advice/advanced-placement-resources)
-** EdX
-*** [AP Courses](https://www.edx.org/learn/ap)
-** Study.com
-*** [AP Exam List by Subject](https://study.com/academy/popular/ap-exam-list-by-subject.html)
-** AP Practice
-*** [AP Practice Exams](https://www.appracticeexams.com/)
-
-* Special Education Resources
-
-+ Redlands Unified School District
-+ Special Education
-+ Enrichment Resources
-
-** All Resources
-*** [Special Education Padlet](https://padlet.com/redlandsusd/enrichment)
-** English
-*** [Elementary Reading](https://exceptionalelementary.com/blog/coronavirusshutdownresources?fbclid=IwAR0NyjcnvCHE29KcxIA0N23HXTCeDAezqkxevfVoM0ZM3bYqvd8KNXyWwEw)
-*** [Newsela](https://newsela.com/)
-** Math
-*** [Khan Academy](https://www.khanacademy.org/)
-*** [Online Math Games](https://www.prodigygame.com/)
-*** [Educational Math Games](https://www.gregtangmath.com/)
-** Extra curricular
-*** [Virtual Field Trips](https://padlet.com/redlandsusd/enrichment/wish/463438559)
-** Parent Resource
-*** [Elementary Mild/Mod Accommodations & Resources](https://padlet-uploads.storage.googleapis.com/478775969/d558c0033067ab2ee72f93c1fc2629ce/Elementary_Mild_Mod_and_RSP_website.pdf)
-*** [Secondary Mild/Mod Accommodations & Resources](https://padlet-uploads.storage.googleapis.com/478775969/8bee7bf36fe59cad713ace691ed1a42f/Secondary_Accommodations.pdf)
-
-* English Learner Resources
-
-+ Redlands Unified School District
-+ English Learner
-+ Enrichment Resources
-
-** Elementary School
-*** [English/Spanish Vocabulary](https://www.colorincolorado.org/sites/default/files/Cognate-List.pdf)
-*** [Math Practice](https://www.ixl.com/?gclid=EAIaIQobChMI-IGBnv2m6AIVMgh9Ch3_FgLxEAEYASAAEgJS0PD_BwE)
-*** [Games and Activities](https://www.funbrain.com/)
-*** [Read/Listen to Books in Multiple Languages](https://www.uniteforliteracy.com/)
-** Middle School
-*** [English/Spanish Vocabulary](https://www.colorincolorado.org/sites/default/files/Cognate-List.pdf)
-*** [Math Practice](https://www.ixl.com/?gclid=EAIaIQobChMI-IGBnv2m6AIVMgh9Ch3_FgLxEAEYASAAEgJS0PD_BwE)
-*** [Games and Activities](https://www.funbrain.com/)
-** High School
-*** [English/Spanish Vocabulary](https://www.colorincolorado.org/sites/default/files/Cognate-List.pdf)
-*** [Math Practice](https://www.ixl.com/?gclid=EAIaIQobChMI-IGBnv2m6AIVMgh9Ch3_FgLxEAEYASAAEgJS0PD_BwE)
-*** [English Language Practice](https://www.fluentu.com/english/)
-
-* Social/Emotional Learning Resources
-
-+ Redlands Unified School District
-+ Social/Emotional Learning
-+ Enrichment Resources
-
-** Behavior Supports
-*** [Behavior Management Strategies](https://docs.google.com/document/d/1oQVrXSQj7_Txtkh3NRchU3Jd-G8BidVQD819EwsFN8A/edit)
-*** [PBISWorld](https://www.pbisworld.com/)
-** Mental Health Supports
-*** [SB County DBH COVID-19 Resources](http://wp.sbcounty.gov/dbh/covid-19-resource-for-community-contract-providers-and-staff/)
-*** [CDC: Managing Stress and Anxiety](https://www.cdc.gov/coronavirus/2019-ncov/prepare/managing-stress-anxiety.html)
-*** [NAMI COVID-19 Resource and Information Guide](https://www.nami.org/getattachment/About-NAMI/NAMI-News/2020/NAMI-Updates-on-the-Coronavirus/COVID-19-Updated-Guide-1.pdf)
-** Managing Social Distancing
-*** [SAMHSA Tips for Social Distancing](https://www.samhsa.gov/sites/default/files/tips-social-distancing-quarantine-isolation-031620.pdf)
-*** [CASEL Guidelines for Parents and Caregivers](https://casel.org/sp_faq/guidelines-for-parents-and-caregivers/)
-*** [TedEd Emotional Health](https://ed.ted.com/lessons?category=emotional-health)
-** Social Emotional Learning Resources
-*** [Collaborative Learning Solutions](https://www.clsteam.net/category/covid-19-resources/)
-*** [Daily SEL Lesson](https://www.clsteam.net/category/daily-sel-lesson/)
-*** [Nearpod SEL Content](https://nearpod.com/social-emotional-learning)
-*** [Second Step COVID-19 Resources](https://www.secondstep.org/covid19support)
-*** [Teaching Through a Pandemic](https://www.edutopia.org/article/teaching-through-pandemic-mindset-moment)
-** Student Supports Overview
-*** [RUSD COVID-19 Student Supports Overview](https://prezi.com/2qgxs_r5_p6u/student-support/?utm_campaign=share&utm_medium=copy)
