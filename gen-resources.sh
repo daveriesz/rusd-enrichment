@@ -1,6 +1,21 @@
 #!/bin/bash
 
+state=beginning
 
+cat "$0" \
+| sed -e "0,/^START FROM HERE$/d" \
+| while read aa ; do
+  if echo "$aa" | egrep "^\* " >/dev/null ; then
+    echo "$aa"
+    filename=`echo "${aa}.html" | tr "[A-Z]" "[a-z]" | sed "s/^\* *//g" | tr " " "-"`
+    echo "  $filename"
+  fi  
+
+done
+
+exit 0
+
+START FROM HERE
 
 * K-5th Resources
 
